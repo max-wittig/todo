@@ -1,12 +1,15 @@
 #[macro_use]
+extern crate serde_derive;
+#[macro_use]
 extern crate clap;
+extern crate serde_yaml;
 
 use std::str;
 use clap::{Arg, App, ArgGroup};
 
-fn get_args() {
-    let mut task_name :String = String::from("sfsdf");
-    let mut task_description : String;
+fn get_args() -> (String, String) {
+    let mut task_name :String = String::from("");
+    let mut task_description : String = String::from("");
 
     let matches = App::new("Simple Todo")
         .version("1.0.0")
@@ -33,40 +36,79 @@ fn get_args() {
         _ => println!("You can only use this argument once"),
     };
 
-    println!("{}", task_name);
+    (task_name, task_description)
 }
 
 fn main() {
-    let mut task_list = Vec::new();
-    get_args();
-    let task_name = String::from("Test");
-    let task_description = String::from("Test description");
-    todo::add_task(&mut task_list, task_name, task_description);
-    println!("{:#?}", task_list)
+    let mut todo_list = todo::load();
+    let (task_name, task_description) = get_args();
+    todo::TodoList::add_task(&mut todo_list, task_name, task_description);
+    todo_list.save(String::from("todo.yaml"));
 }
 
 pub mod todo {
-    pub fn add_task(task_list: &mut Vec<Task>,
-                task_name : String, description : String) {
-        let task = Task {
-            task_name,
-            description,
-            done: false,
-        };
+    use std::fs::File;
+    use serde_yaml;
+    use std::io::Read;
+    use std::io::Error;
+    use std::io::Write;
 
-        task_list.push(task);
+    pub fn load() -> TodoList {
+        match File::open("todo.yaml") {
+            Err(_) => {
+                println!("File not found. Creating new todo list...");
+                new()
+            },
+            Ok(mut file) => {
+                let mut file_content = String::new();
+                file.read_to_string(&mut file_content).unwrap();
+                serde_yaml::from_str(&mut file_content).unwrap()
+            },
+        }
     }
 
-    #[derive(Debug)]
+    pub fn new() -> TodoList {
+        TodoList {
+            task_list: Vec::new()
+        }
+    }
+
+    #[derive(Debug, Serialize, Deserialize)]
+    pub struct TodoList {
+        task_list : Vec<Task>
+    }
+
+    #[derive(Debug, Serialize, Deserialize)]
     pub struct Task {
         task_name: String,
         description: String,
         done : bool,
     }
 
+    impl TodoList {
+        pub fn add_task(&mut self, task_name : String, description : String) {
+            let task = Task {
+                task_name,
+                description,
+                done: false,
+            };
+
+            self.task_list.push(task);
+        }
+
+        pub fn save(&self, filename : String) {
+            let mut file = match File::create(&filename) {
+                Err(why) => panic!("Could not create file {0}", &filename),
+                Ok(file) => file,
+            };
+            file.write_all(serde_yaml::to_string(self).unwrap().as_bytes())
+                .expect("File could not be written");
+        }
+    }
+
     impl Task {
-        fn to_json(&self) -> String {
-            String::from("whatever")
+        fn save(&self) -> String {
+            serde_yaml::to_string(self).unwrap()
         }
     }
 }
