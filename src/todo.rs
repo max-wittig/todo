@@ -61,7 +61,7 @@ impl TodoList {
         }
     }
 
-    pub fn task_exists(self, task_name : &String) -> bool {
+    pub fn task_exists(&self, task_name : &String) -> bool {
         for current_task in self.task_list.iter() {
             if current_task.task_name == task_name.as_str() {
                 return true
