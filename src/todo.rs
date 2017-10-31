@@ -3,6 +3,7 @@ use serde_yaml;
 use std::io::Read;
 use std::io::Write;
 use std::process::exit;
+use time::now;
 
 pub fn load() -> TodoList {
     match File::open("todo.yaml") {
@@ -34,11 +35,13 @@ pub struct Task {
     task_name: String,
     description: String,
     done : bool,
+    done_at : i64
 }
 
 impl Task {
-    pub fn mark_down(&mut self) {
+    pub fn mark_done(&mut self) {
         self.done = true;
+        self.done_at = now().to_timespec().sec;
     }
 }
 
@@ -48,6 +51,7 @@ impl TodoList {
             task_name,
             description,
             done,
+            done_at : 0,
         };
 
         self.task_list.push(task);
@@ -56,7 +60,7 @@ impl TodoList {
     pub fn mark_done(&mut self, task_name : String) {
         for current_task in self.task_list.iter_mut() {
             if current_task.task_name == task_name {
-                current_task.mark_down()
+                current_task.mark_done()
             }
         }
     }
@@ -78,7 +82,7 @@ impl TodoList {
             }
             Ok(file) => file,
         };
-        file.write_all(serde_yaml::to_string(self).unwrap().as_bytes())
+        file.write_all(serde_yaml::to_string(&self).unwrap().as_bytes())
             .expect("File could not be written");
     }
 }
