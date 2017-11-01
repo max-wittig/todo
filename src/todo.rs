@@ -27,7 +27,7 @@ pub fn new() -> TodoList {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct TodoList {
     task_list : Vec<Task>
 }
