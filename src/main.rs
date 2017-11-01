@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2017 Max Wittig
+ *
+ * SPDX-License-Identifier:     MIT
+ */
+
 #[macro_use]
 extern crate serde_derive;
 #[macro_use]
