@@ -4,14 +4,14 @@
 
 #### Features
 
-*   add terminal tables ([ee08898f](ee08898f))
-*   add timestamp when done ([a789583e](a789583e))
-*   add yaml read/write functionality ([ca635fd4](ca635fd4))
-*   add command line parsing ([a5679121](a5679121))
+*   add terminal tables
+*   add timestamp when done
+*   add yaml read/write functionality
+*   add command line parsing
 
 #### Bug Fixes
 
-*   fix cannot move out of borrowed content ([79af4203](79af4203))
+*   fix cannot move out of borrowed content
 
 
 
