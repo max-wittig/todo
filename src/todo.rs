@@ -12,11 +12,12 @@ use std::process::exit;
 use time::now;
 use std::fmt;
 use prettytable::Table;
+use chrono::NaiveDateTime;
 
 pub fn load() -> TodoList {
     match File::open("todo.yaml") {
         Err(_) => {
-            println!("File not found. Creating new todo list...");
+            // File not found --> create new list
             new()
         },
         Ok(mut file) => {
@@ -55,14 +56,27 @@ impl Task {
 
 impl TodoList {
     pub fn print(&self) {
-        let mut table = Table::new();
-        table.add_row(row!["Task Name", "Description", "Done", "Done_at"]);
-        for current_task in self.task_list.iter() {
-            table.add_row(row![current_task.task_name, current_task.description,
-                current_task.done, current_task.done_at]);
+        if self.task_list.is_empty() {
+            println!("Task List is empty!")
         }
+        else {
+            let mut table = Table::new();
+            table.add_row(row!["TASK NAME", "DESCRIPTION", "DONE", "DONE AT"]);
+            for current_task in self.task_list.iter() {
+                let done_at_row : String;
+                if current_task.done_at > 0 {
+                    done_at_row = NaiveDateTime::from_timestamp(current_task.done_at, 0)
+                        .format("%Y-%m-%d %H:%M:%S").to_string();
+                }
+                else {
+                    done_at_row = "-".to_string();
+                }
+                table.add_row(row![current_task.task_name, current_task.description,
+                current_task.done, done_at_row]);
+            }
 
-        table.printstd();
+            table.printstd();
+        }
     }
 
     pub fn add_task(&mut self, task_name : String, description : String, done : bool) {
@@ -94,7 +108,7 @@ impl TodoList {
     }
 
     fn to_yaml(&self) -> String {
-        serde_yaml::to_string(&self).unwrap()
+        serde_yaml::to_string(&self).expect("Could not convert to yaml")
     }
 
     pub fn save(&self, filename : String) {

@@ -11,6 +11,7 @@ extern crate prettytable;
 extern crate serde_yaml;
 extern crate clap;
 extern crate time;
+extern crate chrono;
 
 mod todo;
 
@@ -20,7 +21,6 @@ use std::process::exit;
 
 
 fn main() {
-    let mut todo_list = todo::load();
     let matches = App::new("Simple Todo")
         .version("1.0.0")
         .arg(Arg::with_name("task")
@@ -47,6 +47,7 @@ fn main() {
             .takes_value(false))
         .get_matches();
 
+    let mut todo_list = todo::load();
     let task_name = matches.value_of("task");
     let task_description = matches.value_of("description");
     let mark_done;
@@ -73,12 +74,13 @@ fn main() {
         if todo_list.task_exists(&task_name) {
             if mark_done {
                 todo_list.mark_done(task_name);
+                println!("{0}", "Task marked as done!");
             }
         } else {
             todo::TodoList::add_task(&mut todo_list, task_name,
                                      description, mark_done);
-            todo_list.print();
         }
+        todo_list.print();
         todo_list.save(String::from("todo.yaml"));
     } else {
         println!("Please set a task name!");
