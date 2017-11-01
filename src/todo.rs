@@ -4,6 +4,8 @@ use std::io::Read;
 use std::io::Write;
 use std::process::exit;
 use time::now;
+use std::fmt;
+use prettytable::Table;
 
 pub fn load() -> TodoList {
     match File::open("todo.yaml") {
@@ -46,6 +48,17 @@ impl Task {
 }
 
 impl TodoList {
+    pub fn print(&self) {
+        let mut table = Table::new();
+        table.add_row(row!["Task Name", "Description", "Done", "Done_at"]);
+        for current_task in self.task_list.iter() {
+            table.add_row(row![current_task.task_name, current_task.description,
+                current_task.done, current_task.done_at]);
+        }
+
+        table.printstd();
+    }
+
     pub fn add_task(&mut self, task_name : String, description : String, done : bool) {
         let task = Task {
             task_name,
@@ -74,6 +87,10 @@ impl TodoList {
         false
     }
 
+    fn to_yaml(&self) -> String {
+        serde_yaml::to_string(&self).unwrap()
+    }
+
     pub fn save(&self, filename : String) {
         let mut file = match File::create(&filename) {
             Err(_) => {
@@ -82,7 +99,13 @@ impl TodoList {
             }
             Ok(file) => file,
         };
-        file.write_all(serde_yaml::to_string(&self).unwrap().as_bytes())
+        file.write_all(self.to_yaml().as_bytes())
             .expect("File could not be written");
+    }
+}
+
+impl fmt::Display for TodoList {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{0}", self.to_yaml())
     }
 }

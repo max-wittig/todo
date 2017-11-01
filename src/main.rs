@@ -1,5 +1,5 @@
-#[macro_use]
-extern crate serde_derive;
+#[macro_use] extern crate serde_derive;
+#[macro_use] extern crate prettytable;
 extern crate serde_yaml;
 extern crate clap;
 extern crate time;
@@ -69,6 +69,6 @@ fn main() {
     else {
         todo::TodoList::add_task(&mut todo_list, task_name, task_description, mark_done);
     }
-
+    todo_list.print();
     todo_list.save(String::from("todo.yaml"));
 }
