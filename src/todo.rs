@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2017 Max Wittig
+ *
+ * SPDX-License-Identifier:     MIT
+ */
+
 use std::fs::File;
 use serde_yaml;
 use std::io::Read;
