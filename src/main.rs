@@ -10,7 +10,6 @@ extern crate serde_derive;
 extern crate prettytable;
 extern crate serde_yaml;
 extern crate clap;
-extern crate time;
 extern crate chrono;
 
 mod todo;
@@ -73,12 +72,13 @@ fn main() {
 
         if todo_list.task_exists(&task_name) {
             if mark_done {
-                todo_list.mark_done(task_name);
+                todo_list.mark_done(&task_name);
                 println!("{0}", "Task marked as done!");
             }
         } else {
-            todo::TodoList::add_task(&mut todo_list, task_name,
-                                     description, mark_done);
+            todo::TodoList::add_task(&mut todo_list, &task_name,
+                                     &description);
+            todo::TodoList::mark_done(&mut todo_list, &task_name);
         }
         todo_list.print();
         todo_list.save(String::from("todo.yaml"));

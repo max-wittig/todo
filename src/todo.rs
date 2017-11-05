@@ -9,10 +9,10 @@ use serde_yaml;
 use std::io::Read;
 use std::io::Write;
 use std::process::exit;
-use time::now;
 use std::fmt;
 use prettytable::Table;
 use chrono::NaiveDateTime;
+use chrono::Local;
 
 pub fn load() -> TodoList {
     match File::open("todo.yaml") {
@@ -50,7 +50,7 @@ pub struct Task {
 impl Task {
     pub fn mark_done(&mut self) {
         self.done = true;
-        self.done_at = now().to_timespec().sec;
+        self.done_at = Local::now().timestamp();
     }
 }
 
@@ -79,20 +79,22 @@ impl TodoList {
         }
     }
 
-    pub fn add_task(&mut self, task_name : String, description : String, done : bool) {
+    pub fn add_task(&mut self, task_name : &String, description : &String) {
+        let task_name = task_name.to_string();
+        let description = description.to_string();
         let task = Task {
             task_name,
             description,
-            done,
+            done : false,
             done_at : 0,
         };
 
         self.task_list.push(task);
     }
 
-    pub fn mark_done(&mut self, task_name : String) {
+    pub fn mark_done(&mut self, task_name : &String) {
         for current_task in self.task_list.iter_mut() {
-            if current_task.task_name == task_name {
+            if current_task.task_name == task_name.to_string() {
                 current_task.mark_done()
             }
         }
