@@ -14,7 +14,6 @@ extern crate chrono;
 
 mod todo;
 
-use std::str;
 use clap::{Arg, App};
 use std::process::exit;
 
@@ -49,13 +48,7 @@ fn main() {
     let mut todo_list = todo::load();
     let task_name = matches.value_of("task");
     let task_description = matches.value_of("description");
-    let mark_done;
-    if matches.occurrences_of("mark_done") > 0 {
-        mark_done = true;
-    }
-    else {
-        mark_done = false;
-    }
+    let mark_done = matches.occurrences_of("mark_done") > 0;
     if matches.occurrences_of("print") > 0 {
         todo_list.print();
         exit(0);
@@ -81,7 +74,7 @@ fn main() {
             todo::TodoList::mark_done(&mut todo_list, &task_name);
         }
         todo_list.print();
-        todo_list.save(String::from("todo.yaml"));
+        todo_list.save(&String::from("todo.yaml"));
     } else {
         println!("Please set a task name!");
         exit(1);

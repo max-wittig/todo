@@ -23,7 +23,7 @@ pub fn load() -> TodoList {
         Ok(mut file) => {
             let mut file_content = String::new();
             file.read_to_string(&mut file_content).unwrap();
-            serde_yaml::from_str(&mut file_content).unwrap()
+            serde_yaml::from_str(&file_content).unwrap()
         },
     }
 }
@@ -62,15 +62,11 @@ impl TodoList {
         else {
             let mut table = Table::new();
             table.add_row(row!["TASK NAME", "DESCRIPTION", "DONE", "DONE AT"]);
-            for current_task in self.task_list.iter() {
-                let done_at_row : String;
-                if current_task.done_at > 0 {
-                    done_at_row = NaiveDateTime::from_timestamp(current_task.done_at, 0)
-                        .format("%Y-%m-%d %H:%M:%S").to_string();
-                }
-                else {
-                    done_at_row = "-".to_string();
-                }
+            for current_task in &self.task_list {
+                let done_at_row = if current_task.done_at > 0 {
+                    NaiveDateTime::from_timestamp(current_task.done_at, 0)
+                        .format("%Y-%m-%d %H:%M:%S").to_string() } else { "-".to_string() };
+
                 table.add_row(row![current_task.task_name, current_task.description,
                 current_task.done, done_at_row]);
             }
@@ -79,7 +75,7 @@ impl TodoList {
         }
     }
 
-    pub fn add_task(&mut self, task_name : &String, description : &String) {
+    pub fn add_task(&mut self, task_name : &str, description : &str) {
         let task_name = task_name.to_string();
         let description = description.to_string();
         let task = Task {
@@ -92,17 +88,17 @@ impl TodoList {
         self.task_list.push(task);
     }
 
-    pub fn mark_done(&mut self, task_name : &String) {
-        for current_task in self.task_list.iter_mut() {
-            if current_task.task_name == task_name.to_string() {
+    pub fn mark_done(&mut self, task_name : &str) {
+        for current_task in &mut self.task_list {
+            if current_task.task_name == task_name {
                 current_task.mark_done()
             }
         }
     }
 
-    pub fn task_exists(&self, task_name : &String) -> bool {
-        for current_task in self.task_list.iter() {
-            if current_task.task_name == task_name.as_str() {
+    pub fn task_exists(&self, task_name : &str) -> bool {
+        for current_task in &self.task_list {
+            if current_task.task_name == task_name {
                 return true
             }
         }
@@ -113,11 +109,11 @@ impl TodoList {
         serde_yaml::to_string(&self).expect("Could not convert to yaml")
     }
 
-    pub fn save(&self, filename : String) {
+    pub fn save(&self, filename : &str) {
         let mut file = match File::create(&filename) {
             Err(_) => {
                 println!("Could not create file");
-                exit(1);
+                exit(1)
             }
             Ok(file) => file,
         };
